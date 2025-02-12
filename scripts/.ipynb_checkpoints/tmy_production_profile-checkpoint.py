@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 warnings.filterwarnings(action='ignore', module='pvfactors')
 
 
-# Universal parameters
+# Temporary universal parameters
 TIMEZONE = 3
 
 # Functions
@@ -88,11 +88,10 @@ def read_data(
 
 
 def read_data_api(lat, lon):
-    startyear = 2014
-    url = f"https://re.jrc.ec.europa.eu/api/v5_3/tmy?lat={lat}&lon={lon}&startyear={startyear}&outputformat=basic"
+    startyear =2015
+    url = f"https://re.jrc.ec.europa.eu/api/v5_2/tmy?lat={lat}&lon={lon}&startyear={startyear}&outputformat=basic"
     r = requests.get(url)
     df = pd.read_csv(io.StringIO(r.text))
-    print(df)
 
     df.columns.values[0] = "dt"
     df.columns.values[3] = "ghi"
@@ -114,7 +113,7 @@ def read_data_api(lat, lon):
     data = data[~((data.index.month == 2) & (data.index.day == 29))]
     print(data)
 
-    url = f"https://re.jrc.ec.europa.eu/api/v5_3/tmy?lat={lat}&lon={lon}&startyear={startyear}&outputformat=json"
+    url = f"https://re.jrc.ec.europa.eu/api/v5_2/tmy?lat={lat}&lon={lon}&outputformat=json"
     r = requests.get(url, timeout=20)
     data_raw = pd.read_json(io.StringIO(r.text))
 
@@ -193,7 +192,8 @@ def effective_irradiance(
         # Remove leap days in case there are any as the TMY data does not have them.
         times = times[~((times.month == 2) & (times.day == 29))]
         # Brute force fix for the March bug caused by shifting and the previous day being leap day. #NOTE comment or uncomment this line if you get array size not matching error!
-        # times = times[~((times.month == 3) & (times.day == 1) & (times.hour < TIMEZONE))]
+        times = times[~((times.month == 3) & (
+            times.day == 1) & (times.hour < TIMEZONE))]
     print(times)
 
     # Define location
